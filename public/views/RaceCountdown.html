@@ -1,14 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Race Countdown</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/lap-line-tracker.css">
 </head>
 <body>
-  <h1>Race Countdown</h1>
-  <div id="countdownTimer">
-    <h2>Race Starts In: <span id="countdown">10:00</span></h2>
+<div class="countdown-display">
+  <div id="raceStatus" class="race-status status-waiting">
+    Waiting for race to start...
   </div>
+  <div id="timer" class="timer">10:00</div>
+  <button id="fullScreenBtn" class="full-screen-btn">
+    Toggle Full Screen
+  </button>
+</div>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/components/display/RaceTimer.js"></script>
   <script src="/js/services/socketService.js"></script>
 </body>

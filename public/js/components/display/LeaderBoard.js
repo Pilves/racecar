@@ -4,7 +4,7 @@ class LeaderBoard {
         this.raceData = null;
         this.sortField = 'fastestLap';
         this.sortDirection = 'asc';
-        
+
         this.initialize();
     }
 
@@ -31,7 +31,7 @@ class LeaderBoard {
                 laps: laps.length,
                 lastLap: lapTimes[lapTimes.length - 1] || 0,
                 fastestLap: Math.min(...lapTimes) || 0,
-                averageLap: lapTimes.length ? 
+                averageLap: lapTimes.length ?
                     lapTimes.reduce((a, b) => a + b, 0) / lapTimes.length : 0
             };
         });
@@ -129,5 +129,32 @@ class LeaderBoard {
             this.processData();
             this.render();
         });
+    }
+
+    // Method to update with new lap data
+    updateLapTime(lapData) {
+        if (!this.raceData) return;
+
+        const { carNumber, timestamp, duration } = lapData;
+        const driver = this.raceData.drivers.find(d => d.carNumber === carNumber);
+        if (driver) {
+            if (!this.raceData.lapTimes.has(carNumber)) {
+                this.raceData.lapTimes.set(carNumber, []);
+            }
+            this.raceData.lapTimes.get(carNumber).push(lapData);
+            this.processData();
+            this.render();
+        }
+    }
+
+    // Method to highlight fastest lap
+    highlightFastestLap(carNumber, lapTime) {
+        const row = this.container.querySelector(`tr[data-car="${carNumber}"]`);
+        if (row) {
+            row.classList.add('fastest-lap-highlight');
+            setTimeout(() => {
+                row.classList.remove('fastest-lap-highlight');
+            }, 3000);
+        }
     }
 }

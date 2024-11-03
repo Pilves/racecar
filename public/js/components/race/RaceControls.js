@@ -6,7 +6,7 @@ class RaceControls {
         this.onEnd = options.onEnd || (() => {});
         this.socket = io();
         this.currentMode = 'safe';
-        
+
         this.initialize();
     }
 
@@ -127,7 +127,7 @@ class RaceControls {
 
     updateMode(mode) {
         this.currentMode = mode;
-        
+
         // Remove active class from all buttons
         document.querySelectorAll('.mode-button').forEach(button => {
             button.classList.remove('active');

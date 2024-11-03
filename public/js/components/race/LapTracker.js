@@ -3,11 +3,11 @@ class LapTracker {
         this.container = document.getElementById(options.containerId || 'lapTracker');
         this.onLapRecorded = options.onLapRecorded || (() => {});
         this.socket = io();
-        
+
         this.currentRace = null;
         this.lapTimes = new Map();
         this.isActive = false;
-        
+
         this.initialize();
     }
 
@@ -85,7 +85,7 @@ class LapTracker {
         buttons.forEach(button => {
             button.addEventListener('click', () => {
                 if (!this.isActive) return;
-                
+
                 const carNumber = parseInt(button.dataset.car);
                 this.recordLap(carNumber);
                 this.animateButton(button);
@@ -122,7 +122,7 @@ class LapTracker {
 
     handleLapRecorded(lapData) {
         const { carNumber, lapNumber, duration } = lapData;
-        
+
         // Update lap count display
         const button = document.getElementById(`car-${carNumber}`);
         if (button) {
@@ -152,7 +152,7 @@ class LapTracker {
         const lapTimesHtml = allLaps.map(lap => {
             const driver = this.currentRace.drivers.find(d => d.carNumber === lap.carNumber);
             const isBestLap = this.isBestLap(lap);
-            
+
             return `
                 <div class="lap-time-entry ${isBestLap ? 'best-lap' : ''}">
                     <div class="car-info">
@@ -196,13 +196,13 @@ class LapTracker {
         const summaryHtml = `
             <div class="summary-grid">
                 ${this.currentRace.drivers.map(driver => {
-                    const stats = summaryData[driver.carNumber] || {
-                        totalLaps: 0,
-                        bestLap: 0,
-                        averageLap: 0
-                    };
-                    
-                    return `
+            const stats = summaryData[driver.carNumber] || {
+                totalLaps: 0,
+                bestLap: 0,
+                averageLap: 0
+            };
+
+            return `
                         <div class="summary-card">
                             <h4>Car #${driver.carNumber} - ${driver.name}</h4>
                             <div class="stats">
@@ -221,7 +221,7 @@ class LapTracker {
                             </div>
                         </div>
                     `;
-                }).join('')}
+        }).join('')}
             </div>
         `;
 
@@ -234,11 +234,11 @@ class LapTracker {
 
         this.lapTimes.forEach((laps, carNumber) => {
             const lapTimes = laps.map(lap => lap.duration).filter(Boolean);
-            
+
             summary[carNumber] = {
                 totalLaps: laps.length,
                 bestLap: Math.min(...lapTimes),
-                averageLap: lapTimes.length ? 
+                averageLap: lapTimes.length ?
                     lapTimes.reduce((a, b) => a + b, 0) / lapTimes.length : 0
             };
         });

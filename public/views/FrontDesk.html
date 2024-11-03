@@ -1,24 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Front Desk</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Front Desk - Race Management</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>Front Desk Interface</h1>
-  <div>
-    <h2>Upcoming Race Sessions</h2>
-    <table id="raceSessionsTable">
-      <!-- Rows will be dynamically generated -->
-    </table>
-    <h2>Add New Race Session</h2>
-    <form id="addRaceForm">
-      <input type="text" id="driverName" placeholder="Driver Name" required>
-      <button type="submit">Add Driver</button>
+<!-- Auth Screen -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <h2 class="auth-title">Front Desk Login</h2>
+    <form id="authForm" class="auth-form">
+      <input type="password"
+             id="accessKey"
+             class="auth-input"
+             placeholder="Enter Access Key (salakala)"
+             required>
+      <div id="authError" class="error-message"></div>
+      <button type="submit" class="auth-button">Login</button>
     </form>
   </div>
-  <script src="/js/components/auth/AuthManager.js"></script>
-  <script src="/js/components/display/RaceSessionManager.js"></script>
-  <script src="/js/services/apiService.js"></script>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="app-container hidden">
+  <header class="app-header">
+    <h1 class="app-title">Race Management - Front Desk</h1>
+    <button id="logoutBtn" class="logout-button">Logout</button>
+  </header>
+
+  <section class="section race-sessions">
+    <h2 class="section-title">Upcoming Race Sessions</h2>
+    <table class="data-table sessions-table">
+      <thead>
+      <tr>
+        <th>Driver Name</th>
+        <th>Car Number</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody id="raceSessionsTable"></tbody>
+    </table>
+  </section>
+
+  <section class="section add-driver">
+    <h2 class="section-title">Add New Driver</h2>
+    <form id="addDriverForm" class="driver-form">
+      <input type="text"
+             id="driverName"
+             class="form-input"
+             placeholder="Enter driver name"
+             required>
+      <button type="submit" class="form-button">Add Driver</button>
+    </form>
+  </section>
+</div>
+
+<!-- Scripts -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Debug logs for authentication flow
+  console.log('Scripts loading...');
+</script>
+<script>
+  // Simple API service
+  const apiService = {
+    async login(accessKey, interfaceType) {
+      try {
+        console.log('Attempting login...', { interfaceType });
+        const response = await fetch('/api/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ accessKey, interfaceType })
+        });
+
+        console.log('Login response status:', response.status);
+        const data = await response.json();
+        console.log('Login response:', data);
+
+        if (response.ok) {
+          localStorage.setItem('authToken', data.token);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Login error:', error);
+        return false;
+      }
+    }
+  };
+
+  // Simple socket service
+  const socketService = {
+    socket: null,
+
+    initialize(token) {
+      console.log('Initializing socket with token...');
+      this.socket = io(window.location.origin, {
+        auth: { token }
+      });
+
+      this.socket.on('connect', () => {
+        console.log('Socket connected!');
+      });
+
+      this.socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error);
+      });
+    },
+
+    getSocket() {
+      return this.socket;
+    }
+  };
+
+  // Auth manager
+  class AuthManager {
+    constructor() {
+      console.log('AuthManager initializing...');
+      this.token = localStorage.getItem('authToken');
+      this.authScreen = document.getElementById('authScreen');
+      this.mainApp = document.getElementById('mainApp');
+      this.authForm = document.getElementById('authForm');
+      this.authError = document.getElementById('authError');
+
+      this.initialize();
+    }
+
+    initialize() {
+      console.log('Setting up auth listeners...');
+      if (this.authForm) {
+        this.authForm.addEventListener('submit', (e) => this.handleLogin(e));
+      }
+
+      if (this.token) {
+        this.validateAndShowApp();
+      }
+    }
+
+    async handleLogin(e) {
+      e.preventDefault();
+      console.log('Login form submitted');
+
+      const accessKey = document.getElementById('accessKey').value;
+
+      try {
+        const success = await apiService.login(accessKey, 'front-desk');
+        if (success) {
+          console.log('Login successful');
+          await socketService.initialize(localStorage.getItem('authToken'));
+          this.showMainApp();
+        } else {
+          console.log('Login failed');
+          this.showError('Invalid access key');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        this.showError('An error occurred during login');
+      }
+    }
+
+    async validateAndShowApp() {
+      try {
+        const response = await fetch('/api/auth/validate', {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          }
+        });
+
+        if (response.ok) {
+          await socketService.initialize(this.token);
+          this.showMainApp();
+        } else {
+          localStorage.removeItem('authToken');
+          this.token = null;
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+        localStorage.removeItem('authToken');
+        this.token = null;
+      }
+    }
+
+    showError(message) {
+      this.authError.textContent = message;
+      this.authError.classList.remove('hidden');
+    }
+
+    showMainApp() {
+      this.authScreen.classList.add('hidden');
+      this.mainApp.classList.remove('hidden');
+      window.dispatchEvent(new CustomEvent('auth:complete'));
+    }
+  }
+
+  // Initialize auth manager when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing auth...');
+    window.authManager = new AuthManager();
+  });
+</script>
+<script src="/js/components/display/RaceSessionManager.js"></script>
 </body>
 </html>

@@ -1,219 +1,188 @@
-# 🏁 Project Overview: Race Management System
-The Race Management System is a web-based platform designed to manage race events, including race sessions, drivers, and lap times. It consists of a server-side API built with Node.js and a front-end UI for user interaction. Below is a detailed summary of the project components and functionality.
+# 🏁 Race Management System
 
+A real-time race management system designed for Beachside Racetrack, enabling race control, lap timing, and spectator information displays.
 
-## 📂 Folder Structure
+## 📋 Features
+
+- **Real-time Race Management**
+  - Live lap timing
+  - Race mode controls (Safe, Hazard, Danger, Finish)
+  - Up to 8 drivers per race
+  - 10-minute race sessions (1 minute in development mode)
+
+- **Multiple Interfaces**
+  - 🎫 Front Desk: Race session and driver management
+  - 🎮 Race Control: Safety controls and race mode management
+  - ⏱️ Lap-line Tracker: Real-time lap recording
+  - 📊 Leader Board: Live race standings
+  - 🏎️ Next Race: Upcoming race information
+  - ⏰ Race Countdown: Race timer display
+  - 🚦 Race Flags: Current race mode indicator
+
+- **Security**
+  - Role-based authentication
+  - Protected employee interfaces
+  - JWT-based API security
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-.
-├── .env               # Stores environment variables such as API keys and configuration settings
-├── folder_structure.txt  # Documentation of the project's folder structure
-├── package-lock.json  # Defines project dependencies and scripts (lockfile)
-├── package.json       # Defines project dependencies and scripts
-├── public/
-│   ├── index.html     # Main entry page that provides navigation to different interfaces
-│   ├── css/
-│   │   ├── styles.css               # Main stylesheet
-│   │   ├── base/
-│   │   │   └── _variables.css       # Contains CSS variables for consistent styling
-│   │   ├── components/
-│   │   │   ├── _auth.css            # Styles for authentication components
-│   │   │   ├── _lap-tracker.css     # Styles for lap tracker elements
-│   │   │   ├── _leader-board.css    # Styles for leaderboard
-│   │   │   ├── _race-controls.css   # Styles for race controls
-│   │   │   ├── _race-timer.css      # Styles for race timer display
-│   │   │   └── _responsive.css      # Styles to make the UI responsive
-│   │   └── utils/
-│   │       └── _animations.css      # Reusable animations
-│   ├── js/
-│   │   ├── components/
-│   │   │   ├── auth/
-│   │   │   │   └── AuthManager.js   # Handles user authentication
-│   │   │   ├── display              # Manage race display components/
-│   │   │   │   ├── LapTimesDisplay.js
-│   │   │   │   ├── LeaderBoard.js
-│   │   │   │   ├── NextRaceDisplay.js
-│   │   │   │   ├── RaceSessionManager.js
-│   │   │   │   └── RaceTimer.js
-│   │   │   └── race/
-│   │   │       ├── FlagDisplay.js   # Handle flag display in race events
-│   │   │       ├── LapTracker.js
-│   │   │       └── RaceControls.js
-│   │   ├── services/
-│   │   │   ├── apiService.js        # Manages API calls to the server
-│   │   │   └── socketService.js     # Connects the client via Socket.io
-│   │   └── utils
-│   └── views/
-│       ├── FrontDesk.html           # Interface for managing race sessions at the front desk
-│       ├── LapLineTracker.html      # Interface for tracking laps
-│       ├── LeaderBoard.html         # Displays the current leaderboard
-│       ├── NextRace.html            # Shows details of upcoming race
-│       ├── RaceControl.html         # Interface to control race events
-│       ├── RaceCountdown.html       # Countdown timer for races
-│       └── RaceFlags.html           # Displays current flag status
-└── server/
-    ├── app.js               # Main entry point for the server
-    ├── config/
-    │   ├── database.js      # Manages connection to the SQLite database
-    │   └── socket.js        # Configures Socket.io
-    ├── constants/
-    │   └── raceConstants.js # Defines constants like race statuses and modes
-    ├── controllers/
-    │   ├── authController.js  # Handles user authentication
-    │   └── raceController.js  # Manages race-related operations
-    ├── database/
-    │   ├── db.js              # Initializes SQLite database tables
-    │   └── racetrack.db       # SQLite database
-    ├── middleware/
-    │   ├── authMiddleware.js  # Handles JWT-based authentication
-    │   ├── errorHandler.js    # Handles errors in requests
-    │   └── validateRequest.js # Validates request data
-    ├── models/
-    │   └── Race.js            # Methods for interacting with race data
-    ├── routes/
-    │   └── api.js             # API endpoints for race management
-    ├── services/
-    │   ├── raceService.js     # Business logic related to races
-    │   └── socketService.js   # Handles Socket.io events
-    ├── socket/
-    │   └── eventHandlers.js   # Manages Socket.io events
-    └── utils/
-        ├── timeUtils.js       # Utility functions related to time
-        └── validationUtils.js # Handles validation for sessions and drivers
+git clone https://github.com/pilves/racecar.git
+cd racecar
 ```
-## 📁 Project Structure
-### Root Files
-- **.env**: Stores environment variables such as API keys and configuration settings.
-- **package.json & package-lock.json**: Define project dependencies and scripts.
-- **project_context.md**: Documentation of the project's folder structure.
-- **tree.txt**: Output of the `tree` command to visualize the project structure.
 
-### Public Directory
-Contains all client-side assets, including HTML, CSS, and JavaScript files.
+2. Install dependencies:
+```bash
+npm install
+```
 
-- **index.html**: Main entry page that provides navigation to different interfaces such as Front Desk, Race Control, and Leader Board.
-- **css**: Contains the stylesheets for the project.
-  - **styles.css**: Main stylesheet.
-  - **base/_variables.css**: Contains CSS variables for consistent styling.
-  - **components**: Component-specific styles, including:
-    - **_auth.css**: Styles for authentication components.
-    - **_lap-tracker.css**: Styles for lap tracker elements.
-    - **_leader-board.css**: Styles for the leaderboard.
-    - **_race-controls.css**: Styles for race controls.
-    - **_race-timer.css**: Styles for race timer display.
-    - **_responsive.css**: Styles to make the UI responsive across devices.
-  - **utils/_animations.css**: Reusable animations used throughout the project.
-- **js**: Contains JavaScript modules for client-side functionality.
-  - **components**
-    - **auth/AuthManager.js**: Handles user authentication.
-    - **display**
-      - **LapTimesDisplay.js, LeaderBoard.js, NextRaceDisplay.js, RaceSessionManager.js, RaceTimer.js**: Manage race display components like lap times, leader board, and race timer.
-    - **race**
-      - **FlagDisplay.js, LapTracker.js, RaceControls.js**: Handle in-race events like flag displays, lap tracking, and control inputs.
-  - **services**
-    - **apiService.js**: Manages API calls to the server-side RESTful API.
-    - **socketService.js**: Connects the client to the server via Socket.io for real-time updates.
+3. Create a .env file in the root directory:
+```env
+NODE_ENV=development
+PORT=3000
+RECEPTIONIST_KEY=your_front_desk_key
+OBSERVER_KEY=your_lap_line_key
+SAFETY_KEY=your_race_control_key
+JWT_SECRET=your_jwt_secret
+```
 
-### Views
-- **HTML Files**: Pages for different sections of the race management system.
-  - **FrontDesk.html**: Interface for managing race sessions at the front desk.
-  - **LapLineTracker.html**: Interface for tracking laps.
-  - **LeaderBoard.html**: Displays the current leaderboard and race status.
-  - **NextRace.html**: Shows details of the upcoming race, including drivers.
-  - **RaceControl.html**: Interface to control race events like setting race modes.
-  - **RaceCountdown.html**: Countdown timer for races.
-  - **RaceFlags.html**: Displays the current flag status for race conditions.
+4. Initialize the database:
+```bash
+npm run init-db
+```
 
-### Server Directory
-The backend part of the project, implemented using Express.js.
+5. Start the server:
+```bash
+# Development mode (1-minute races)
+npm run dev
 
-- **app.js**: Main entry point for the server. Initializes middleware, static routes, and API routes.
-- **config**
-  - **database.js**: Manages connection to the SQLite database.
-  - **socket.js**: Configures Socket.io for real-time communication.
-- **constants/raceConstants.js**: Defines constants like race statuses, modes, and configurations.
-- **controllers**
-  - **authController.js**: Handles user authentication, generating JWT tokens.
-  - **raceController.js**: Manages race-related operations, including creating races, adding drivers, and controlling the race.
-- **database**
-  - **db.js**: Initializes SQLite database tables and provides query functions.
-  - **racetrack.db**: SQLite database storing race information.
-- **middleware**
-  - **authMiddleware.js**: Handles authentication using JWT tokens.
-  - **errorHandler.js**: Middleware for handling errors in requests.
-  - **validateRequest.js**: Validates incoming request data against predefined schemas.
-- **models/Race.js**: Defines methods for interacting with race data in the database, such as creating races and managing drivers.
-- **routes/api.js**: Defines the API endpoints, including authentication, race management, and driver operations.
-- **services**
-  - **raceService.js**: Contains business logic related to races, including starting a race, getting the current race, and managing the state of a race.
-  - **socketService.js**: Handles Socket.io events for broadcasting race-related updates.
-- **socket/eventHandlers.js**: Manages Socket.io events such as connections and disconnections.
-- **utils**
-  - **timeUtils.js**: Provides utility functions related to time, like formatting race timers and calculating elapsed time.
-  - **validationUtils.js**: Handles validation for race sessions, access keys, and driver information.
+# Production mode (10-minute races)
+npm start
+```
 
-## ✨ Key Features
-- **🔄 Real-Time Updates**: Uses Socket.io to provide real-time updates for race events like lap tracking, leaderboard changes, and race controls.
-- **🔒 Authentication**: JWT-based authentication to secure API endpoints and manage access.
-- **🏎️ Race Management**: Supports creating, starting, and ending races, as well as managing drivers and recording lap times.
-- **💻 Frontend Views**: Different HTML interfaces for roles such as front desk management, race control, lap tracking, and leaderboard monitoring.
+## 🖥️ Interface Access
 
-## 🛠️ Technologies Used
-- **Backend**: Node.js, Express.js, SQLite
-- **Frontend**: HTML, CSS, JavaScript
-- **Real-Time Communication**: Socket.io
-- **Authentication**: JSON Web Token (JWT)
+After starting the server, the following interfaces are available:
 
-## 🏟️ Racetrack Info-Screens and Functional Requirements
-Beachside Racetrack is a local racetrack that requires a system to control races and inform spectators in real time. The system aims to reduce reliance on staff by automating race management and spectator information.
+- Front Desk: `http://localhost:3000/front-desk`
+- Race Control: `http://localhost:3000/race-control`
+- Lap-line Tracker: `http://localhost:3000/lap-line-tracker`
+- Leader Board: `http://localhost:3000/leader-board`
+- Next Race: `http://localhost:3000/next-race`
+- Race Countdown: `http://localhost:3000/race-countdown`
+- Race Flags: `http://localhost:3000/race-flags`
 
-### 🌊 Situation Overview
-Beachside Racetrack is located in a touristic area and has various facilities such as a reception area, paddock, and spectator seating. Due to high competition for hiring staff, the racetrack seeks to automate its operations as much as possible.
+## 👥 User Guide
 
-### 📋 Functional Requirements
-- **User Personas**
-  - **Employee**: General term for anyone employed by the racetrack.
-  - **Safety Official**: Responsible for starting races, ensuring safety, and monitoring hazards.
-  - **Lap-line Observer**: Records when cars cross the lap line; role will be automated in the future.
-  - **Flag Bearer**: Communicates safety instructions to drivers using flags; will be replaced by screens.
-  - **Receptionist**: Welcomes guests and registers race drivers at the front desk.
-  - **Guest**: Any person present at the racetrack.
-  - **Race Driver**: Guest participating in a race.
-  - **Spectator**: Guest watching a race.
+### Front Desk Interface
+![Front Desk Interface](./docs/images/front-desk.png)
 
-- **Race Sessions**
-  - Up to 8 drivers compete to achieve the fastest lap in a 10-minute race session.
-  - The Safety Official starts the race and monitors safety.
+1. Access the Front Desk interface
+2. Enter the receptionist access key
+3. Create a new race session
+4. Add drivers (up to 8)
+5. Drivers are automatically assigned car numbers
 
-- **Race Cars**
-  - All cars are equal in performance and identified by a number.
-  - The cars are tracked entities during the race, and driver performance is linked to the car.
+### Race Control Interface
+![Race Control Interface](./docs/images/race-control.png)
 
-- **Current Race Modes**
-  - **🟢 Safe**: No flag.
-  - **🟡 Hazard**: Yellow flag, drivers must drive slowly.
-  - **🔴 Danger**: Red flag, drivers must stop.
-  - **🏁 Finish**: Chequered flag, drivers proceed to the pit lane.
+1. Access the Race Control interface
+2. Enter the safety official access key
+3. Start race when ready
+4. Control race modes:
+   - 🟢 Safe: Normal racing conditions
+   - 🟡 Hazard: Caution required
+   - 🔴 Danger: Stop racing
+   - 🏁 Finish: Race ending
 
-### 📖 User Stories and Desired Processes
-- **Configure Upcoming Races**: Receptionist configures race sessions, including adding/removing drivers and race sessions.
-- **Announce Next Race**: Drivers are automatically assigned cars and informed when it's their turn.
-- **Start Race**: Safety Official starts the race using an interface, updating the race mode and leaderboard.
-- **Control Race Modes**: Safety Official can change race modes using an interface, with screens replacing flag bearers.
-- **Finish Race and End Session**: Race ends automatically or manually, and cars return to the pit lane.
-- **Record Lap Times**: Lap-line Observer uses a tablet to record lap times by pressing buttons representing each car.
-- **Spectator View**: Spectators can view leaderboards with real-time lap times, current laps, and race status.
+### Lap-line Tracker Interface
+![Lap Line Tracker Interface](./docs/images/lap-tracker.png)
 
-### 🔐 Security Requirements
-- Employee interfaces must be protected with access keys defined as environment variables.
-- Each interface (Front Desk, Race Control, Lap-line Tracker) requires its own access key.
-- Incorrect access key attempts result in a delay before prompting again.
+1. Access the Lap-line Tracker interface
+2. Enter the observer access key
+3. Click car buttons when they cross the lap line
+4. View real-time lap times
+5. See session summary after race ends
 
-### 💻 Technology Requirements
-- **Backend**: Node.js server using Socket.io for real-time functionality.
-- **Frontend**: Interfaces accessible via first-level routes for each user type (e.g., `/leader-board`, `/next-race`).
-- **Real-Time Communication**: All displays and interfaces must update in real time without polling.
+### Public Displays
 
-### 📚 Additional Requirements
-- **Documentation**: A README.md file explaining how to start the server and use the system, including setting environment variables.
-- **Persistence**: The MVP does not require data persistence, but future versions could implement persistent storage.
+All public displays feature a fullscreen button for optimal visibility:
 
+#### Leader Board
+- Real-time race standings
+- Fastest lap times
+- Current lap counts
+- Race mode indicator
+
+#### Next Race
+- Upcoming drivers list
+- Assigned car numbers
+- Race start countdown
+
+#### Race Flags
+- Large, clear display of current race mode
+- Automatic updates from Race Control
+
+## 🛠️ Development
+
+### Environment Variables
+
+- `NODE_ENV`: Set to 'development' for 1-minute races, 'production' for 10-minute races
+- `PORT`: Server port number
+- `RECEPTIONIST_KEY`: Front Desk access key
+- `OBSERVER_KEY`: Lap-line Tracker access key
+- `SAFETY_KEY`: Race Control access key
+- `JWT_SECRET`: Secret for JWT token generation
+
+### Database Schema
+
+The system uses SQLite with the following main tables:
+- `races`: Race session information
+- `drivers`: Driver and car assignments
+- `lap_times`: Recorded lap times
+
+### Socket Events
+
+Real-time updates are handled through Socket.IO events:
+- `raceStarted`: Race session begins
+- `raceModeChanged`: Race mode updates
+- `lapRecorded`: New lap time recorded
+- `raceEnded`: Race session completed
+
+## 📱 Responsive Design
+
+All interfaces are responsive and work on various devices:
+- Desktop: Full featured interfaces
+- Tablet: Optimized for lap timing and race control
+- Mobile: Essential functions and viewing capabilities
+
+## 🔒 Security Notes
+
+- Employee interfaces require access keys
+- Invalid key attempts have a 500ms delay
+- Access keys should be complex and unique
+- JWT tokens expire after 8 hours
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the ISC License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## 📧 Support
+
+For support and questions, please contact [support@beachsideracetrack.com](mailto:support@beachsideracetrack.com)

@@ -1,17 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Next Race</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Race Information</title>
+  <link rel="stylesheet" href="/css/next-race.css">
 </head>
 <body>
-  <h1>Next Race</h1>
-  <div id="nextRace">
-    <h2>Drivers and Cars</h2>
-    <ul id="nextRaceList">
-      <!-- List items for each driver and car will be dynamically generated -->
-    </ul>
+<div id="nextRaceDisplay" class="next-race-display">
+  <div class="header">
+    <h1>Next Race Session</h1>
+    <button id="fullScreenBtn" class="full-screen-btn">
+      Toggle Full Screen
+    </button>
   </div>
+
+  <!-- Status Message -->
+  <div id="statusMessage" class="status-message">
+    Loading race information...
+  </div>
+
+  <!-- Driver Grid -->
+  <div id="driverGrid" class="driver-grid">
+    <!-- Drivers will be dynamically added here -->
+  </div>
+
+  <!-- Instructions -->
+  <div id="instructions" class="instructions">
+    <!-- Dynamic instructions will appear here -->
+  </div>
+
+  <!-- Current Race Info (if one is in progress) -->
+  <div id="currentRaceInfo" class="current-race-info">
+    <!-- Current race status will appear here -->
+  </div>
+</div>
+
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/js/components/display/NextRaceDisplay.js"></script>
   <script src="/js/services/socketService.js"></script>
 </body>

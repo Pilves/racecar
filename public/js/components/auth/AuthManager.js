@@ -6,7 +6,7 @@ class AuthManager {
         this.authForm = document.getElementById('authForm');
         this.authError = document.getElementById('authError');
         this.interfaceType = this.getInterfaceType();
-        
+
         this.initialize();
     }
 
@@ -50,6 +50,10 @@ class AuthManager {
             if (response.ok) {
                 this.token = data.token;
                 localStorage.setItem('authToken', this.token);
+
+                // Initialize socket connection with the token
+                await socketService.initialize(this.token);
+
                 this.showMainApp();
             } else {
                 this.showError(data.message || 'Authentication failed');
@@ -70,15 +74,19 @@ class AuthManager {
             });
 
             if (response.ok) {
+                // Initialize socket connection with the token
+                await socketService.initialize(this.token);
                 this.showMainApp();
             } else {
                 localStorage.removeItem('authToken');
                 this.token = null;
+                this.showAuthScreen();
             }
         } catch (error) {
             console.error('Token validation error:', error);
             localStorage.removeItem('authToken');
             this.token = null;
+            this.showAuthScreen();
         }
     }
 
@@ -96,8 +104,14 @@ class AuthManager {
         window.dispatchEvent(new CustomEvent('auth:complete'));
     }
 
+    showAuthScreen() {
+        this.authScreen.classList.remove('hidden');
+        this.mainApp.classList.add('hidden');
+    }
+
     logout() {
         localStorage.removeItem('authToken');
+        socketService.disconnect();
         this.token = null;
         window.location.reload();
     }

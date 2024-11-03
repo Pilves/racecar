@@ -5,11 +5,11 @@ class RaceTimer {
         this.onTick = options.onTick || (() => {});
         this.duration = options.duration || 600000; // 10 minutes default
         this.warningThreshold = options.warningThreshold || 60000; // 1 minute warning
-        
+
         this.timeLeft = 0;
         this.interval = null;
         this.isRunning = false;
-        
+
         this.initialize();
     }
 
@@ -41,7 +41,7 @@ class RaceTimer {
         this.update();
         this.interval = setInterval(() => {
             this.timeLeft -= 1000;
-            
+
             if (this.timeLeft <= 0) {
                 this.stop();
                 this.onFinish();
