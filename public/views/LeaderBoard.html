@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leader Board</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>Leader Board</h1>
+  <div id="leaderboard">
+    <h2>Current Race Session</h2>
+    <table id="leaderboardTable">
+      <!-- Rows for car numbers, driver names, and lap times will be generated dynamically -->
+    </table>
+    <div id="raceTimer">
+      <h2>Time Remaining: <span id="timeRemaining">10:00</span></h2>
+    </div>
+    <div id="flagStatus">
+      <h2>Flag Status: <span id="currentFlag">Safe</span></h2>
+    </div>
+  </div>
+  <script src="/js/components/display/LeaderBoard.js"></script>
+  <script src="/js/services/socketService.js"></script>
+</body>
+</html>

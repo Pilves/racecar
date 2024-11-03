@@ -1,0 +1,326 @@
+.lap-tracker-container {
+    display: grid;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Car Buttons Grid */
+.car-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.car-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border-radius: var(--radius-md);
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.car-button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.car-button:not(:disabled):active {
+    transform: translateY(0);
+}
+
+.car-button.disabled {
+    background-color: var(--color-secondary);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.car-button .car-number {
+    font-size: var(--text-3xl);
+    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+.car-button .driver-name {
+    font-size: var(--text-lg);
+    margin-bottom: var(--spacing-sm);
+}
+
+.car-button .lap-count {
+    font-size: var(--text-sm);
+    opacity: 0.9;
+}
+
+/* Button Animation */
+@keyframes flash {
+    0% { background-color: var(--color-success); }
+    100% { background-color: var(--color-primary); }
+}
+
+.car-button.flash {
+    animation: flash 0.2s ease-out;
+}
+
+/* Lap Times Display */
+.lap-times-display {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.lap-times-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.lap-time-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    transition: transform 0.2s ease;
+}
+
+.lap-time-entry:hover {
+    transform: translateX(var(--spacing-xs));
+}
+
+.lap-time-entry.best-lap {
+    background-color: var(--color-success-light);
+    border-left: 4px solid var(--color-success);
+}
+
+.car-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.car-info .car-number {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-weight: bold;
+}
+
+.lap-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.lap-time {
+    font-family: 'Monaco', monospace;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+/* Session Summary */
+.session-summary {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.summary-card {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+}
+
+.summary-card h4 {
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-sm);
+}
+
+.stats {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat label {
+    color: var(--text-secondary);
+}
+
+.stat span {
+    font-family: 'Monaco', monospace;
+    font-weight: bold;
+}
+
+/* Latest/Best Laps Display */
+.lap-times-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+    .lap-times-display {
+        grid-template-columns: 1fr;
+    }
+}
+
+.latest-laps,
+.best-laps {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.lap-list {
+    margin-top: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.lap-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+}
+
+.lap-entry:hover {
+    transform: translateX(var(--spacing-xs));
+}
+
+.lap-entry.best {
+    background-color: var(--color-success-light);
+    border-left: 4px solid var(--color-success);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .car-buttons-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .car-button {
+        padding: var(--spacing-lg);
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lap-time-entry {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .lap-time-entry {
+        background-color: var(--bg-dark);
+    }
+
+    .lap-time-entry.best-lap {
+        background-color: rgba(var(--color-success-rgb), 0.2);
+    }
+
+    .summary-card {
+        background-color: var(--bg-dark);
+    }
+
+    .lap-entry {
+        background-color: var(--bg-dark);
+    }
+
+    .lap-entry.best {
+        background-color: rgba(var(--color-success-rgb), 0.2);
+    }
+}
+
+/* Animation Classes */
+.hidden {
+    display: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* CSS Variables Extension */
+:root {
+    /* Adding new color variations */
+    --color-success-light: rgba(34, 197, 94, 0.1);
+    --color-warning-light: rgba(234, 179, 8, 0.1);
+    --color-danger-light: rgba(220, 38, 38, 0.1);
+    
+    /* RGB values for opacity handling */
+    --color-success-rgb: 34, 197, 94;
+    --color-warning-rgb: 234, 179, 8;
+    --color-danger-rgb: 220, 38, 38;
+    
+    /* Additional spacing values */
+    --spacing-2xs: 0.125rem;
+    --spacing-3xl: 3rem;
+    --spacing-4xl: 4rem;
+    
+    /* Font features */
+    --font-mono: 'Monaco', monospace;
+    
+    /* Z-index layers */
+    --z-background: -1;
+    --z-default: 1;
+    --z-overlay: 10;
+    --z-modal: 100;
+}

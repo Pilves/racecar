@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Race Control</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <h1>Race Control Interface</h1>
+  <div id="raceStatus">
+    <h2>Race Mode</h2>
+    <button onclick="setRaceMode('Safe')">Safe</button>
+    <button onclick="setRaceMode('Hazard')">Hazard</button>
+    <button onclick="setRaceMode('Danger')">Danger</button>
+    <button onclick="setRaceMode('Finish')">Finish</button>
+  </div>
+  <script src="/js/components/race/RaceControls.js"></script>
+  <script src="/js/services/socketService.js"></script>
+</body>
+</html>

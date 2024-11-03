@@ -1,0 +1,80 @@
+.auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--spacing-md);
+    background-color: var(--bg-light);
+}
+
+.auth-card {
+    background: var(--bg-primary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-title {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.auth-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.auth-button {
+    width: 100%;
+    padding: var(--spacing-md);
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.auth-button:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.error-message {
+    color: var(--color-danger);
+    font-size: var(--text-sm);
+    margin-bottom: var(--spacing-md);
+    display: none;
+}
+
+/* public/css/components/_race-timer.css */
+.race-timer {
+    font-family: 'Monaco', monospace;
+    font-size: var(--text-4xl);
+    font-weight: bold;
+    text-align: center;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.timer-warning {
+    color: var(--color-warning);
+}
+
+.timer-danger {
+    color: var(--color-danger);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
