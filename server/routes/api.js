@@ -1,110 +1,156 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const Race = require('../models/Race'); // Make sure this path is correct
+const AuthController = require('../controllers/authController');
+const RaceController = require('../controllers/raceController');
+const { authenticateJWT, requireRole } = require('../middleware/authMiddleware');
+const { validateRequest } = require('../middleware/validateRequest');
+const { raceValidation } = require('../middleware/validations');
 
-// Authentication middleware
-const authenticateJWT = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
-
-    const token = authHeader.split(' ')[1];
-    try {
-        const user = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = user;
-        next();
-    } catch (err) {
-        return res.status(403).json({ message: 'Invalid token' });
-    }
-};
-
-// Auth endpoint
-router.post('/auth', async (req, res) => {
-    try {
-        const { accessKey, interfaceType } = req.body;
-
-        // Add delay for failed attempts
-        if (!validateAccessKey(accessKey, interfaceType)) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            return res.status(401).json({
-                message: 'Invalid access key'
-            });
-        }
-
-        const token = jwt.sign(
-            { interfaceType },
-            process.env.JWT_SECRET,
-            { expiresIn: '8h' }
-        );
-
-        res.json({ token });
-    } catch (error) {
-        console.error('Auth error:', error);
-        res.status(500).json({ message: 'Authentication failed' });
-    }
+// Health check route
+router.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: Date.now() });
 });
 
-// Get current race
-router.get('/race/current', authenticateJWT, async (req, res) => {
-    try {
-        const race = await Race.getCurrentRace();
-        res.json(race || { drivers: [] });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to get current race' });
-    }
+// Auth routes
+router.post('/auth', validateRequest(raceValidation.auth), AuthController.authenticate);
+router.get('/auth/validate', authenticateJWT, AuthController.validateToken);
+router.post('/auth/refresh', authenticateJWT, AuthController.refreshToken);
+router.post('/auth/logout', authenticateJWT, AuthController.logout);
+
+// Race Management Routes
+// Front Desk Operations
+router.route('/races')
+  .get(
+    authenticateJWT,
+    requireRole(['front-desk', 'race-control']),
+    RaceController.listRaces,
+  )
+  .post(
+    authenticateJWT,
+    requireRole('front-desk'),
+    raceValidation.createRace, // Validation rules for creating a race
+    validateRequest,
+    RaceController.createRace,
+  );
+
+router.get(
+  '/races/current',
+  authenticateJWT,
+  RaceController.getCurrentRace,
+);
+
+router.route('/races/:raceId')
+  .get(
+    authenticateJWT,
+    RaceController.getRaceById,
+  )
+  .put(
+    authenticateJWT,
+    requireRole('front-desk'),
+    validateRequest(raceValidation.updateRace),
+    RaceController.updateRace,
+  )
+  .delete(
+    authenticateJWT,
+    requireRole('front-desk'),
+    RaceController.deleteRace,
+  );
+
+// Driver Management
+router.route('/races/:raceId/drivers')
+  .get(
+    authenticateJWT,
+    RaceController.getDrivers,
+  )
+  .post(
+    authenticateJWT,
+    requireRole('front-desk'),
+    validateRequest(raceValidation.addDriver),
+    RaceController.addDriver,
+  );
+
+router.route('/races/:raceId/drivers/:driverId')
+  .delete(
+    authenticateJWT,
+    requireRole('front-desk'),
+    RaceController.removeDriver,
+  )
+  .put(
+    authenticateJWT,
+    requireRole('front-desk'),
+    validateRequest(raceValidation.updateDriver),
+    RaceController.updateDriver,
+  );
+
+// Race Control Operations
+router.put(
+  '/races/:raceId/start',
+  authenticateJWT,
+  requireRole('race-control'),
+  RaceController.startRace,
+);
+
+router.put(
+  '/races/:raceId/end',
+  authenticateJWT,
+  requireRole('race-control'),
+  RaceController.endRace,
+);
+
+router.put(
+  '/races/:raceId/mode',
+  authenticateJWT,
+  requireRole('race-control'),
+  validateRequest(raceValidation.changeMode),
+  RaceController.changeRaceMode,
+);
+
+// Lap Time Recording
+router.route('/races/:raceId/laps')
+  .get(
+    authenticateJWT,
+    RaceController.getLaps,
+  )
+  .post(
+    authenticateJWT,
+    requireRole('lap-line-tracker'),
+    validateRequest(raceValidation.recordLap),
+    RaceController.recordLap,
+  );
+
+// Race Statistics
+router.get(
+  '/races/:raceId/stats',
+  authenticateJWT,
+  RaceController.getRaceStats,
+);
+
+router.get(
+  '/races/:raceId/leaderboard',
+  authenticateJWT,
+  RaceController.getLeaderboard,
+);
+
+// Error handling
+router.use((req, res) => {
+  res.status(404).json({
+    error: 'NotFound',
+    message: `Cannot ${req.method} ${req.url}`,
+  });
 });
 
-// Add driver to current race
-router.post('/race/current/driver', authenticateJWT, async (req, res) => {
-    try {
-        const { name } = req.body;
-        if (!name || typeof name !== 'string' || name.trim().length === 0) {
-            return res.status(400).json({ message: 'Valid driver name is required' });
-        }
+router.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'development'
+    ? err.message
+    : 'Internal server error';
 
-        let race = await Race.getCurrentRace();
-        if (!race) {
-            race = await Race.create();
-        }
-
-        const driver = await Race.addDriver(race.id, name.trim());
-        res.status(201).json(driver);
-    } catch (error) {
-        console.error('Add driver error:', error);
-        res.status(500).json({ message: 'Failed to add driver' });
-    }
+  res.status(status).json({
+    error: err.name || 'ServerError',
+    message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
 });
-
-// Remove driver from current race
-router.delete('/race/current/driver/:driverId', authenticateJWT, async (req, res) => {
-    try {
-        const { driverId } = req.params;
-        await Race.removeDriver(parseInt(driverId));
-        res.json({ message: 'Driver removed successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to remove driver' });
-    }
-});
-
-// Token validation endpoint
-router.get('/auth/validate', authenticateJWT, (req, res) => {
-    res.json({ valid: true });
-});
-
-// Helper function to validate access keys
-function validateAccessKey(key, interfaceType) {
-    switch (interfaceType) {
-        case 'front-desk':
-            return key === process.env.RECEPTIONIST_KEY;
-        case 'lap-line-tracker':
-            return key === process.env.OBSERVER_KEY;
-        case 'race-control':
-            return key === process.env.SAFETY_KEY;
-        default:
-            return false;
-    }
-}
 
 module.exports = router;

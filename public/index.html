@@ -2,27 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to the Race Management System</title>
-    <link rel="stylesheet" href="/css/styles.css"> <!-- Include your CSS file -->
+    <title>Race Management System</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<header>
-    <h1>Welcome to the Race Management System</h1>
-</header>
-<main>
-    <p>Use the navigation below to access different parts of the system:</p>
-    <ul>
-        <li><a href="/front-desk">Front Desk Interface</a></li>
-        <li><a href="/race-control">Race Control Interface</a></li>
-        <li><a href="/lap-line-tracker">Lap Line Tracker</a></li>
-        <li><a href="/leader-board">Leaderboard</a></li>
-        <li><a href="/next-race">Next Race</a></li>
-    </ul>
-</main>
-<footer>
-    <p>&copy; 2024 Race Management System. All rights reserved.</p>
-</footer>
+<div id="mainContent">
+    <!-- View containers -->
+    <div data-view="leader-board" class="view-container hidden"></div>
+    <div data-view="next-race" class="view-container hidden"></div>
+    <div data-view="race-countdown" class="view-container hidden"></div>
+    <div data-view="race-flags" class="view-container hidden"></div>
+    <div data-view="front-desk" class="view-container hidden"></div>
+    <div data-view="race-control" class="view-container hidden"></div>
+    <div data-view="lap-line-tracker" class="view-container hidden"></div>
+    <div data-view="login" class="view-container hidden"></div>
+</div>
+
+<!-- Socket.IO -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- Application -->
+<script type="module">
+  import viewRegistration from './js/services/ViewRegistration.js';
+  import stateManager from './js/services/StateManager.js';
+
+  // Initialize the application
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await viewRegistration.initialize();
+    } catch (error) {
+      console.error('Failed to initialize application:', error);
+    }
+  });
+</script>
 </body>
 </html>

@@ -1,103 +1,112 @@
-// public/js/services/apiService.js
+import stateManager from './StateManager.js';
 
 class ApiService {
-    constructor() {
-        this.baseUrl = '/api';
-    }
+  constructor() {
+    this.baseUrl = '/api';
+  }
 
-    getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json'
-        };
+  async request(method, endpoint, data = null, authenticate = true) {
+    try {
+      const url = `${this.baseUrl}${endpoint}`;
+      console.log('Making request to:', url); // Add debug log
+      console.log('Request data:', data); // Add debug log
 
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (authenticate) {
         const token = localStorage.getItem('authToken');
         if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+          headers.Authorization = `Bearer ${token}`;
         }
+      }
 
-        return headers;
+      const options = {
+        method,
+        headers
+      };
+
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+
+      console.log('Request options:', options); // Add debug log
+
+      const response = await fetch(url, options);
+      console.log('Response status:', response.status); // Add debug log
+
+      const responseData = await response.json();
+      console.log('Response data:', responseData); // Add debug log
+
+      if (!response.ok) {
+        const error = new Error(responseData.message || 'Request failed');
+        error.status = response.status;
+        error.details = responseData.errors;
+        throw error;
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error('API request failed:', error);
+      throw error;
+    }
+  }
+
+  async login(interfaceType, accessKey) {
+    if (!interfaceType || !accessKey) {
+      throw new Error('Interface type and access key are required');
     }
 
-    async get(endpoint) {
-        try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                method: 'GET',
-                headers: this.getHeaders()
-            });
-            return response;
-        } catch (error) {
-            console.error('API GET Error:', error);
-            throw error;
-        }
+    try {
+      const response = await this.request('POST', '/auth', {
+        interfaceType,
+        accessKey
+      }, false);
+
+      console.log('Login response:', response); // Debug log
+
+      if (response.token) {
+        // Store auth data
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('interfaceType', response.interfaceType);
+
+        // Update state manager
+        stateManager.updateState('auth', {
+          isAuthenticated: true,
+          token: response.token,
+          interfaceType: response.interfaceType
+        });
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw new Error(error.message || 'Login failed');
     }
+  }
 
-    async post(endpoint, data) {
-        try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                method: 'POST',
-                headers: this.getHeaders(),
-                body: JSON.stringify(data)
-            });
-            return response;
-        } catch (error) {
-            console.error('API POST Error:', error);
-            throw error;
-        }
-    }
+  async validateToken() {
+    return await this.request('GET', '/auth/validate');
+  }
 
-    async put(endpoint, data) {
-        try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                method: 'PUT',
-                headers: this.getHeaders(),
-                body: JSON.stringify(data)
-            });
-            return response;
-        } catch (error) {
-            console.error('API PUT Error:', error);
-            throw error;
-        }
-    }
+  async refreshToken() {
+    return await this.request('POST', '/auth/refresh');
+  }
 
-    async delete(endpoint) {
-        try {
-            const response = await fetch(`${this.baseUrl}${endpoint}`, {
-                method: 'DELETE',
-                headers: this.getHeaders()
-            });
-            return response;
-        } catch (error) {
-            console.error('API DELETE Error:', error);
-            throw error;
-        }
-    }
+  logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('interfaceType');
+  }
 
-    // Authentication methods
-    async login(accessKey, interfaceType) {
-        try {
-            const response = await this.post('/auth', {
-                accessKey,
-                interfaceType
-            });
+  // Helper methods
+  isAuthenticated() {
+    return !!localStorage.getItem('authToken');
+  }
 
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('authToken', data.token);
-                return true;
-            }
-
-            return false;
-        } catch (error) {
-            console.error('Login Error:', error);
-            return false;
-        }
-    }
-
-    logout() {
-        localStorage.removeItem('authToken');
-    }
+  getInterfaceType() {
+    return localStorage.getItem('interfaceType');
+  }
 }
 
-// Create singleton instance
-const apiService = new ApiService();
-window.apiService = apiService; // Make it globally available
+export default new ApiService();

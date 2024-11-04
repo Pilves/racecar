@@ -1,92 +1,73 @@
-// server/services/socketService.js
-
 const jwt = require('jsonwebtoken');
 
 class SocketService {
-    constructor() {
-        this.io = null;
-        this.connections = new Map();
+  constructor() {
+    this.io = null;
+  }
+
+  initialize(io) {
+    this.io = io;
+
+    this.io.use(this.authMiddleware.bind(this));
+    this.io.on('connection', this.handleConnection.bind(this));
+  }
+
+  authMiddleware(socket, next) {
+    const { token } = socket.handshake.auth;
+    if (!token) {
+      return next(new Error('Authentication token required'));
     }
 
-    initialize(io) {
-        this.io = io;
-
-        // Socket.IO middleware for authentication
-        this.io.use((socket, next) => {
-            try {
-                const token = socket.handshake.auth.token;
-                if (!token) {
-                    return next(new Error('Authentication token required'));
-                }
-
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                socket.user = decoded;
-                next();
-            } catch (error) {
-                next(new Error('Invalid authentication token'));
-            }
-        });
-
-        this.io.on('connection', this.handleConnection.bind(this));
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = decoded;
+      next();
+    } catch (error) {
+      next(new Error('Invalid authentication token'));
     }
+  }
 
-    handleConnection(socket) {
-        console.log(`Client connected: ${socket.id}`);
+  handleConnection(socket) {
+    console.log(`Client connected: ${socket.id}`);
 
-        this.connections.set(socket.id, {
-            id: socket.id,
-            user: socket.user,
-            socket: socket
-        });
+    socket.on('disconnect', () => {
+      console.log(`Client disconnected: ${socket.id}`);
+    });
 
-        // Handle disconnection
-        socket.on('disconnect', () => {
-            console.log(`Client disconnected: ${socket.id}`);
-            this.connections.delete(socket.id);
-        });
+    socket.on('error', (error) => {
+      console.error(`Socket error from ${socket.id}:`, error);
+    });
 
-        // Handle errors
-        socket.on('error', (error) => {
-            console.error(`Socket error from ${socket.id}:`, error);
-        });
+    this.sendInitialData(socket);
+  }
 
-        // Send initial data if needed
-        this.sendInitialData(socket);
+  sendInitialData(socket) {
+    // Implement sending initial data to the connected client
+  }
+
+  emit(event, data) {
+    if (!this.io) {
+      console.error('Socket.IO not initialized');
+      return;
     }
+    this.io.emit(event, data);
+  }
 
-    sendInitialData(socket) {
-        // You can send any initial data the client needs here
-        // For example, current race status, driver list, etc.
+  emitToRoom(room, event, data) {
+    if (!this.io) {
+      console.error('Socket.IO not initialized');
+      return;
     }
+    this.io.to(room).emit(event, data);
+  }
 
-    // Emit to all clients
-    emit(event, data) {
-        if (this.io) {
-            this.io.emit(event, data);
-        }
-    }
+  joinRoom(socket, room) {
+    socket.join(room);
+  }
 
-    // Emit to specific client
-    emitTo(socketId, event, data) {
-        const connection = this.connections.get(socketId);
-        if (connection && connection.socket) {
-            connection.socket.emit(event, data);
-        }
-    }
-
-    // Emit to clients with specific role
-    emitToRole(role, event, data) {
-        for (const [, connection] of this.connections) {
-            if (connection.user.role === role) {
-                connection.socket.emit(event, data);
-            }
-        }
-    }
-
-    // Broadcast to all except sender
-    broadcast(socket, event, data) {
-        socket.broadcast.emit(event, data);
-    }
+  leaveRoom(socket, room) {
+    socket.leave(room);
+  }
 }
 
 module.exports = new SocketService();

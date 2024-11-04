@@ -1,27 +1,17 @@
 const errorHandler = (err, req, res, next) => {
-    console.error('Error:', err.message);
-    console.error('Stack:', err.stack);
+    console.error(err);
 
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({
-            message: 'Validation Error',
-            details: err.message
-        });
+    if (res.headersSent) {
+        return next(err);
     }
 
-    if (err.name === 'UnauthorizedError') {
-        return res.status(401).json({
-            message: 'Authentication Error',
-            details: err.message
-        });
-    }
+    const statusCode = err.status || 500;
+    const message = err.message || 'Internal Server Error';
+    const stack = process.env.NODE_ENV === 'production' ? undefined : err.stack;
 
-    // Default server error
-    res.status(500).json({
-        message: 'Internal Server Error',
-        details: process.env.NODE_ENV === 'development' 
-            ? err.message 
-            : undefined
+    res.status(statusCode).json({
+        message,
+        stack
     });
 };
 
